@@ -33,7 +33,7 @@ const upload = multer({
 
 
 router.post("/courseAdd", upload, async (req, res) => {
-
+  console.log("courseAdd called")
   try {
     
     const { error } = validateCourseDetail(req.body);
@@ -41,19 +41,20 @@ router.post("/courseAdd", upload, async (req, res) => {
       return res.status(400).send(error.details[0].message);
     }
    
+    // console.log("auther--->",req.body.author)
 
     console.log("REQ>FILE", req.file)
-    console.log("author",req.body);
-    console.log("topics",req.body.topics)
-    const courseData = new courseModel(
+    // console.log("author",req.body);
+    // console.log("topics",req.body.topics)
+     const courseData = new courseModel(
       {
         categoryId:req.body.categoryId,
         courseName: req.body.courseName,
         courseDescription: req.body.courseDescription,
         price: req.body.price,
-        images: req.file.path,  //update this
+        images: req.file.filename,  //update this
         author: req.body.author,
-        topics:req.body.topics,
+        //topics:req.body.topics,
       });
     
     await courseData.save();
@@ -65,7 +66,7 @@ router.post("/courseAdd", upload, async (req, res) => {
         "price",
         "images",
         "author",
-        "topics"
+       // "topics"
       ])
 
     );
@@ -73,6 +74,23 @@ router.post("/courseAdd", upload, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+router.get("/fetch", async (req, res) => {
+  try {
+    const course = await courseModel.findById(req.query.id);
+    console.log("@@@@@@@@@@@@@@", course);
+    if (!course) {
+      return res.status(400).send("course does not exists");
+    } else {
+      res.status(200).json(course);
+    }
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+});
+
+
+
 
 router.get("/fetchCourse", async (req, res) => {
   try {
@@ -105,7 +123,7 @@ router.put("/updateCourse", upload, async (req, res) => {
         price: req.body.price,
         images: req.file.filename,  //update this
         author: req.body.author,
-        topics:req.body.topics,
+        //topics:req.body.topics,
       })
 
     if (!update) {
@@ -135,6 +153,46 @@ router.delete("/coueseDelete", async (req, res) => {
 })
 
 
+router.get("/page", async (req, res) => {
+
+  
+  try {
+    console.log("callled");   
+
+    let pageNo = parseInt(req.query.pageNo)
+    let size = parseInt(req.query.size)
+
+    if (pageNo < 0 || pageNo === 0) {
+      return res.status(400).json({ message: "Invalid page  number" });
+    }
+    countpage = await courseModel.count();
+    let totalPages = Math.ceil(countpage / size)
+    console.log("@@@@@", totalPages);
+
+
+    await courseModel.find({}).limit(size).skip(size * (pageNo - 1))
+      .then((result) => {
+
+        if (!result) {
+          return res.status(400).send("Record does not exists");
+        }
+
+        let responce = {
+          record : result,
+          recordFilter : result.length,
+          recordTotal : countpage
+        }
+        res.status(200).json(responce);
+      })
+      .catch((err) => {
+        res.status(401).send({
+          message: err.message,
+        });
+      });
+  } catch (error) {
+    res.status(401).json({ message: error.message });
+  }
+});
 
 
 module.exports = router;

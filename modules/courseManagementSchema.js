@@ -18,8 +18,8 @@ const course = new mongoose.Schema({
     courseDescription: { type: String, min: 3, max: 255 },
     price: { type: Number },
     images: { type:String},
-    author: authors,
-    topics: [topic]
+   author: authors,
+  // topics: [topic]
 }, { timestamps: true });
 const courseModel = mongoose.model('courses', course);
 
@@ -32,7 +32,7 @@ function validateCourseDetail(course) {
         price: Joi.number(),
         images: Joi.string(),
         author:Joi.object(),
-        topics: Joi.array()
+        //topics: Joi.array()
 
     });
     return schema.validate(course);
