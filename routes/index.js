@@ -49,9 +49,9 @@ router.post("/courseAdd", upload, async (req, res) => {
       {
         categoryId:req.body.categoryId,
         courseName: req.body.courseName,
-        categoryDescription: req.body.categoryDescription,
+        courseDescription: req.body.courseDescription,
         price: req.body.price,
-        images: req.file.filename,  //update this
+        images: req.file.path,  //update this
         author: req.body.author,
         topics:req.body.topics,
       });
